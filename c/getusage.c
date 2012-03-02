@@ -1,4 +1,4 @@
-//Last modified: 25/02/12 17:50:17(CET) by Fabian Holler
+//Last modified: 03/03/12 00:44:18(CET) by Fabian Holler
 #include <stdlib.h> 
 #include <sys/types.h>
 #include <stdio.h>
@@ -31,6 +31,8 @@ int get_usage(const pid_t pid, struct pstat* result){
 
     //Open /proc/stat and /proc/$pid/stat fds successive(dont want that cpu
     //ticks increases too much during measurements)
+    //TODO: open /proc dir, to lock all files and read the results from the
+    //same timefragem
     FILE *fpstat = fopen(stat_filepath, "r");
     if(fpstat == NULL){
         perror("FOPEN ERROR ");
