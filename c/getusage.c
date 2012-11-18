@@ -1,11 +1,11 @@
-//Last modified: 03/03/12 00:44:18(CET) by Fabian Holler
+//Last modified: 18/11/12 19:13:35(CET) by Fabian Holler
 #include <stdlib.h> 
 #include <sys/types.h>
 #include <stdio.h>
-#include <strings.h>
+#include <string.h>
 #include <unistd.h>
 
-struct pstat{
+struct pstat {
     long unsigned int utime_ticks;
     long int cutime_ticks;
     long unsigned int stime_ticks;
@@ -20,7 +20,7 @@ struct pstat{
  * read /proc data into the passed struct pstat
  * returns 0 on success, -1 on error
 */
-int get_usage(const pid_t pid, struct pstat* result){
+int get_usage(const pid_t pid, struct pstat* result) {
     //convert  pid to string
     char pid_s[20];
     snprintf(pid_s, sizeof(pid_s), "%d", pid);
@@ -29,18 +29,14 @@ int get_usage(const pid_t pid, struct pstat* result){
     strncat(stat_filepath, "/stat", sizeof(stat_filepath) -
             strlen(stat_filepath) -1);
 
-    //Open /proc/stat and /proc/$pid/stat fds successive(dont want that cpu
-    //ticks increases too much during measurements)
-    //TODO: open /proc dir, to lock all files and read the results from the
-    //same timefragem
     FILE *fpstat = fopen(stat_filepath, "r");
-    if(fpstat == NULL){
+    if (fpstat == NULL) {
         perror("FOPEN ERROR ");
         return -1;
     }
 
     FILE *fstat = fopen("/proc/stat", "r");
-    if(fstat == NULL){
+    if (fstat == NULL) {
         perror("FOPEN ERROR ");
         fclose(fstat);
         return -1;
@@ -49,7 +45,7 @@ int get_usage(const pid_t pid, struct pstat* result){
     //read values from /proc/pid/stat
     bzero(result, sizeof(struct pstat));
     long int rss;
-    if(fscanf(fpstat, "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu"
+    if (fscanf(fpstat, "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu"
                 "%lu %ld %ld %*d %*d %*d %*d %*u %lu %ld",
                 &result->utime_ticks, &result->stime_ticks,
                 &result->cutime_ticks, &result->cstime_ticks, &result->vsize,
@@ -63,7 +59,7 @@ int get_usage(const pid_t pid, struct pstat* result){
     //read+calc cpu total time from /proc/stat
     long unsigned int cpu_time[10];
     bzero(cpu_time, sizeof(cpu_time));
-    if(fscanf(fstat, "%*s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu",
+    if (fscanf(fstat, "%*s %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu",
                 &cpu_time[0], &cpu_time[1], &cpu_time[2], &cpu_time[3],
                 &cpu_time[4], &cpu_time[5], &cpu_time[6], &cpu_time[7],
                 &cpu_time[8], &cpu_time[9]) == EOF) {
@@ -73,9 +69,8 @@ int get_usage(const pid_t pid, struct pstat* result){
 
     fclose(fstat);
 
-    for(int i=0; i < 10;i++){
+    for(int i=0; i < 10;i++)
         result->cpu_total_time += cpu_time[i];
-    }
 
     return 0;
 }
