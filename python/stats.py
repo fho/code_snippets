@@ -11,9 +11,11 @@ The JSci port comes frist. "New" code is near the bottom.
 JSci information:
 http://jsci.sourceforge.net/
 Original Author: Mark Hale
+Modified by: Fabian Holler
 Original Licence: LGPL
 """
 
+import sys
 import math
 
 # Relative machine precision.
@@ -346,3 +348,31 @@ def stats(r, confidence_interval=0.05):
     # confidence = +/- t * s_m
     confidence = cached_tinv(confidence_interval, len(r)-1) * s_m
     return average, median, standard_deviation, minimum, maximum, confidence
+
+
+if __name__ == "__main__":
+	if len(sys.argv) != 1:
+		print("usage: %s" % sys.argv[0])
+		print("%s prints statistical information about a data set" % sys.argv[0])
+		print("The dataset is read from STDIN. Every line only has to contain"
+			" one number")
+		sys.exit(1)
+
+	vals = []
+	for line in sys.stdin:
+		try:
+			vals.append(float(line.strip()))
+		except ValueError:
+			print("WARNING: Line: \"%s\" ignored" % line)
+
+	s = stats(vals, 0.001)
+	print("----------------------------------")
+	print("Records: %s" % len(vals))
+	print("Average: %s" % s[0])
+	print("Median: %s" % s[1])
+	print("Min.: %s" % s[3])
+	print("Max.: %s" % s[4])
+	print("Std. Dev.: %s" % s[2])
+	print("99.9%% conf. interval: [%s, %s] (+/-%s)" % (s[0] - s[5], s[0] + s[5],
+				s[5]))
+	print("----------------------------------")
