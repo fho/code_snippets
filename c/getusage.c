@@ -81,12 +81,12 @@ int get_usage(const pid_t pid, struct pstat* result){
 }
 
 /*
-* calculates the actual CPU usage(cur_usage - last_usage) in percent
-* cur_usage, last_usage: both last measured get_usage() results
-* ucpu_usage, scpu_usage: result parameters: user and sys cpu usage in %
+* calculates the elapsed CPU usage between 2 measuring points. in percent
 */
-void calc_cpu_usage(const struct pstat* cur_usage, const struct pstat*
-                    last_usage, double* ucpu_usage, double* scpu_usage){
+void calc_cpu_usage_pct(const struct pstat* cur_usage,
+                        const struct pstat* last_usage,
+                        double* ucpu_usage, double* scpu_usage)
+{
     const long unsigned int total_time_diff = cur_usage->cpu_total_time -
                                               last_usage->cpu_total_time;
 
@@ -99,3 +99,18 @@ void calc_cpu_usage(const struct pstat* cur_usage, const struct pstat*
                     (double) total_time_diff);
 }
 
+/*
+* calculates the elapsed CPU usage between 2 measuring points in ticks
+*/
+void calc_cpu_usage(const struct pstat* cur_usage,
+                    const struct pstat* last_usage,
+                    long unsigned int* ucpu_usage,
+                    long unsigned int* scpu_usage)
+{
+
+    *ucpu_usage = (cur_usage->utime_ticks + cur_usage->cutime_ticks) -
+                  (last_usage->utime_ticks + last_usage->cutime_ticks);
+
+    *scpu_usage = (cur_usage->stime_ticks + cur_usage->cstime_ticks) -
+                  (last_usage->stime_ticks + last_usage->cstime_ticks);
+}
